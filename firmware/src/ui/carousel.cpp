@@ -12,9 +12,15 @@
 #include "ui/screens/screen_usage.h"
 #include "ui/screens/screen_buddy.h"
 #include "ui/screens/screen_settings.h"
+/* USER CODE BEGIN codex_screen */
+#include "ui/screens/screen_codex.h"
+/* USER CODE END codex_screen */
 
 static const screen_module_t* MODULES[] = {
   &home_module, &finance_module, &usage_module, &buddy_module, &settings_module,
+  /* USER CODE BEGIN codex_module */
+  &codex_module,
+  /* USER CODE END codex_module */
 };
 static const int COUNT = (int)(sizeof(MODULES) / sizeof(MODULES[0]));
 
