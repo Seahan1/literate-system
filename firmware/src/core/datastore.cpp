@@ -10,6 +10,11 @@ static finance_rec_t    s_finance[MAX_TICKERS];
 static uint8_t          s_finance_count;
 static usage_rec_t      s_usage;
 static buddy_rec_t      s_buddy;
+/* USER CODE BEGIN media_datastore_storage */
+static media_rec_t      s_media;
+/* USER CODE END media_datastore_storage */
+static notes_rec_t      s_notes;
+static todo_rec_t       s_todo;
 
 static void hdr_loading(record_hdr_t* h) { h->last_updated = 0; h->state = ST_LOADING; h->err = ERR_NONE; }
 
@@ -19,6 +24,11 @@ void datastore_init(void) {
   memset(&s_weather, 0, sizeof(s_weather));       hdr_loading(&s_weather.hdr);
   memset(&s_usage, 0, sizeof(s_usage));           hdr_loading(&s_usage.hdr);
   memset(&s_buddy, 0, sizeof(s_buddy));           hdr_loading(&s_buddy.hdr);
+  /* USER CODE BEGIN media_datastore_init */
+  memset(&s_media, 0, sizeof(s_media));            hdr_loading(&s_media.hdr);
+  /* USER CODE END media_datastore_init */
+  memset(&s_notes, 0, sizeof(s_notes));            hdr_loading(&s_notes.hdr);
+  memset(&s_todo, 0, sizeof(s_todo));              hdr_loading(&s_todo.hdr);
 
   // Seed finance ids/count from the runtime ticker table (already initialized -- NVS-restored list or
   // defaults), NOT DEFAULT_TICKERS: after a reboot with a saved hub config the table holds the restored
@@ -73,6 +83,23 @@ void ds_set_buddy(const buddy_rec_t* r) {
   s_buddy = *r; s_buddy.hdr.state = ST_LIVE; s_buddy.hdr.err = ERR_NONE;
   ds_lock_give(s_lock);
 }
+/* USER CODE BEGIN media_datastore_set */
+void ds_set_media(const media_rec_t* r) {
+  ds_lock_take(s_lock);
+  s_media = *r; s_media.hdr.state = ST_LIVE; s_media.hdr.err = ERR_NONE;
+  ds_lock_give(s_lock);
+}
+/* USER CODE END media_datastore_set */
+void ds_set_notes(const notes_rec_t* r) {
+  ds_lock_take(s_lock);
+  s_notes = *r; s_notes.hdr.state = ST_LIVE; s_notes.hdr.err = ERR_NONE;
+  ds_lock_give(s_lock);
+}
+void ds_set_todo(const todo_rec_t* r) {
+  ds_lock_take(s_lock);
+  s_todo = *r; s_todo.hdr.state = ST_LIVE; s_todo.hdr.err = ERR_NONE;
+  ds_lock_give(s_lock);
+}
 void ds_apply_sessions(const buddy_session_t* s, uint8_t count, uint32_t now) {
   if (count > BUDDY_SESSIONS_MAX) count = BUDDY_SESSIONS_MAX;
   ds_lock_take(s_lock);
@@ -109,6 +136,11 @@ void ds_set_hub_offline(void) {
   ds_lock_take(s_lock);
   s_usage.hdr.state = ST_HUB_OFFLINE;
   s_buddy.hdr.state = ST_HUB_OFFLINE;
+  /* USER CODE BEGIN media_datastore_offline */
+  s_media.hdr.state = ST_HUB_OFFLINE;
+  /* USER CODE END media_datastore_offline */
+  s_notes.hdr.state = ST_HUB_OFFLINE;
+  s_todo.hdr.state = ST_HUB_OFFLINE;
   ds_lock_give(s_lock);
 }
 
@@ -130,6 +162,17 @@ usage_rec_t ds_get_usage(void) {
 buddy_rec_t ds_get_buddy(void) {
   ds_lock_take(s_lock); buddy_rec_t r = s_buddy; ds_lock_give(s_lock); return r;
 }
+/* USER CODE BEGIN media_datastore_get */
+media_rec_t ds_get_media(void) {
+  ds_lock_take(s_lock); media_rec_t r = s_media; ds_lock_give(s_lock); return r;
+}
+/* USER CODE END media_datastore_get */
+notes_rec_t ds_get_notes(void) {
+  ds_lock_take(s_lock); notes_rec_t r = s_notes; ds_lock_give(s_lock); return r;
+}
+todo_rec_t ds_get_todo(void) {
+  ds_lock_take(s_lock); todo_rec_t r = s_todo; ds_lock_give(s_lock); return r;
+}
 
 // --- staleness sweep ---
 static void sweep_one(record_hdr_t* h, uint32_t now, uint32_t stale_s) {
@@ -140,6 +183,11 @@ void ds_tick_staleness(uint32_t now) {
   sweep_one(&s_weather.hdr,    now, WEATHER_STALE_S);
   sweep_one(&s_usage.hdr,      now, USAGE_STALE_S);
   sweep_one(&s_buddy.hdr,      now, BUDDY_STALE_S);
+  /* USER CODE BEGIN media_datastore_stale */
+  sweep_one(&s_media.hdr,      now, MEDIA_STALE_S);
+  /* USER CODE END media_datastore_stale */
+  sweep_one(&s_notes.hdr,      now, NOTES_STALE_S);
+  sweep_one(&s_todo.hdr,       now, TODO_STALE_S);
   for (uint8_t i = 0; i < s_finance_count; i++) sweep_one(&s_finance[i].hdr, now, finance_stale_s(i));
   ds_lock_give(s_lock);
 }

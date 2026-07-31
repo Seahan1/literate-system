@@ -69,10 +69,11 @@ Editorial character: oversized tabular figures, hard hairline rules, strict left
 | **LED Matrix** | black | amber | Pixelify Sans | cell | dot panel, lit-pixel digits |
 | **Oscilloscope** | black | phosphor green | JetBrains Mono | waveform | graticule + signal trace |
 | **Analog Neo** | black | ice blue | Inter (light) | subdial | analog hands; usage sub-dials |
+| **Pac-Man** | black | yellow + cyan + arcade colors | Pixelify Sans | cell | pixel maze, pellets, Pac-Man and ghosts |
 
 Every theme has bespoke per-screen layouts (each composed from the shared tokens + components), plus per-theme background chrome (grids, dot-matrix, graticule, blueprint marks). Custom-drawn widgets include the Analog clock face/hands + sub-dials, the Oscilloscope waveform trace, and the chrome backgrounds; the rest is composed from the gauge component + tokens.
 
-**Canonical theme IDs** (NVS keys / filenames / `beacon_theme_t.id` in `tech.md`): `editorial` (default), `hud`, `dotmatrix`, `blueprint`, `led`, `oscilloscope`, `analog` — these map to the display names above (Editorial Index, Aerospace HUD, Dot-Matrix, Blueprint, LED Matrix, Oscilloscope, Analog Neo).
+**Canonical theme IDs** (NVS keys / filenames / `beacon_theme_t.id` in `tech.md`): `editorial` (default), `hud`, `dotmatrix`, `blueprint`, `led`, `oscilloscope`, `analog`, `pacman` — these map to the display names above (Editorial Index, Aerospace HUD, Dot-Matrix, Blueprint, LED Matrix, Oscilloscope, Analog Neo, Pac-Man).
 
 **Token authority:** this doc owns token *values* and the theme catalog; `tech.md` §6 owns the runtime contract (`beacon_theme_t` struct + `gauge_style_t` enum). Keep them in sync.
 

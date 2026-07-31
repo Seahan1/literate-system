@@ -3,7 +3,7 @@
 #include "ui/gauge_style.h"
 
 // LVGL-free catalog data (host-testable). theme.cpp maps this -> beacon_theme_t (lv_color_t/lv_font_t).
-// DESIGN.md owns token VALUES; only Editorial has full hex there, so the other six are concrete
+// DESIGN.md owns token VALUES; only Editorial has full hex there, so the other seven are concrete
 // realizations of DESIGN.md's named accents (tunable on hardware in the Task 9 demo). bg is always
 // pure black (AMOLED off-pixels). The ids + gauge mapping + struct are the frozen part.
 
@@ -18,8 +18,8 @@ typedef struct {
   uint8_t       stroke_hair, stroke_med;
 } theme_catalog_t;
 
-#define THEME_COUNT 7
-// Catalog order: 0=editorial 1=hud 2=dotmatrix 3=blueprint 4=led 5=oscilloscope 6=analog.
+#define THEME_COUNT 8
+// Catalog order: 0=editorial 1=hud 2=dotmatrix 3=blueprint 4=led 5=oscilloscope 6=analog 7=pacman.
 #define DEFAULT_THEME_INDEX 2   // dotmatrix
 #define THEME_DEFAULT_VER   1   // bump when DEFAULT_THEME_INDEX changes to re-apply once (carousel migration)
 
@@ -32,10 +32,10 @@ static const theme_catalog_t THEME_CATALOG[THEME_COUNT] = {
   { "hud",
     {0,0,0}, {224,247,250}, {96,125,139}, {20,40,46}, {0,229,255}, {255,179,0},
     {0,229,255}, {255,82,82}, {255,179,0}, GAUGE_RING, 40, 2, 1, 2 },
-  // Calm Futurism — faint red, sparse white-on-black, big figures
+  // Dot-Matrix — black AMOLED canvas with a rainbow dot field
   { "dotmatrix",
-    {0,0,0}, {238,238,238}, {120,120,120}, {30,30,30}, {224,86,74}, {224,86,74},
-    {238,238,238}, {224,86,74}, {224,86,74}, GAUGE_BIGFIG, 10, 8, 1, 2 },
+    {0,0,0}, {238,238,238}, {126,126,126}, {30,30,30}, {255,76,170}, {0,214,255},
+    {132,255,150}, {255,92,92}, {255,210,64}, GAUGE_BIGFIG, 22, 8, 1, 2 },
   // Blueprint — draftsman blue, dimension lines
   { "blueprint",
     {0,0,0}, {214,230,245}, {90,120,150}, {26,42,58}, {74,144,217}, {74,144,217},
@@ -52,4 +52,8 @@ static const theme_catalog_t THEME_CATALOG[THEME_COUNT] = {
   { "analog",
     {0,0,0}, {191,227,242}, {96,128,144}, {28,40,48}, {159,208,232}, {159,208,232},
     {191,227,242}, {232,140,140}, {159,208,232}, GAUGE_SUBDIAL, 20, 12, 1, 2 },
+  // Pac-Man — pixel display, neon maze and arcade character palette
+  { "pacman",
+    {0,0,0}, {255,255,255}, {126,126,150}, {34,34,70}, {255,226,40}, {0,222,255},
+    {110,255,82}, {255,74,110}, {255,74,110}, GAUGE_CELL, 45, 0, 1, 2 },
 };

@@ -22,6 +22,10 @@
        for requestWhenInUseAuthorization() or TCC silently denies. Denied => the device keeps IP geolocation. -->
   <key>NSLocationWhenInUseUsageDescription</key>
   <string>Beacon Hub reads your Mac's location once to show an accurate place name and time zone on your Beacon device.</string>
+  <!-- USER CODE BEGIN media_automation -->
+  <key>NSAppleEventsUsageDescription</key>
+  <string>Beacon Hub reads titles from Notes and Reminders, plus playback state from Music or Spotify, for the Beacon device.</string>
+  <!-- USER CODE END media_automation -->
   <!-- Menubar agent: no Dock icon. (Runtime also sets .accessory.) -->
   <key>LSUIElement</key>
   <true/>

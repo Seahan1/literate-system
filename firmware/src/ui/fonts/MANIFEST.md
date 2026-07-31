@@ -22,8 +22,8 @@ Variable fonts instanced to static weights via `fonttools varLib.instancer`.
 
 | Role | Size px | Glyphs | Files |
 |---|---|---|---|
-| hero | 84 | `0-9 : % . , + - / ° space` | one per display family (7) |
-| display | 30 | printable ASCII `0x20-0x7E` + `0xB0` | one per display family (7) |
+| hero | 84 | `0-9 : % . , + - / ° space` | one per display family (8) |
+| display | 30 | printable ASCII `0x20-0x7E` + `0xB0` | one per display family (8) |
 | body | 18 | printable ASCII + `0xB0` | sg, raj, cp, inter, jbm (5) |
 | mono | 15 | printable ASCII + `0xB0` | jbm (1, shared by all themes) |
 
@@ -38,6 +38,7 @@ Variable fonts instanced to static weights via `fonttools varLib.instancer`.
 | led | Pixelify Sans | Inter | JetBrains Mono |
 | oscilloscope | JetBrains Mono | JetBrains Mono | JetBrains Mono |
 | analog | Inter | Inter | JetBrains Mono |
+| pacman | Pixelify Sans | Inter | JetBrains Mono |
 
 ## Regenerate
 

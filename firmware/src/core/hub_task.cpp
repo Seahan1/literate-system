@@ -126,6 +126,30 @@ static void on_frame(const char* json, size_t len) {
   // loc/status fall-through so it isn't silently swallowed by hub_parse_status.
   if (frame_has(json, len, "\"config\"")) { on_config(json, len); return; }
 
+  /* USER CODE BEGIN media_dispatch */
+  media_rec_t media; memset(&media, 0, sizeof(media));
+  bool hm = false;
+  if (hub_parse_media(json, len, &media, &hm) && hm) {
+    media.hdr.last_updated = (uint32_t)timekeep_now();
+    ds_set_media(&media);
+    return;
+  }
+  notes_rec_t notes; memset(&notes, 0, sizeof(notes));
+  bool hn = false;
+  if (hub_parse_notes(json, len, &notes, &hn) && hn) {
+    notes.hdr.last_updated = (uint32_t)timekeep_now();
+    ds_set_notes(&notes);
+    return;
+  }
+  todo_rec_t todo; memset(&todo, 0, sizeof(todo));
+  bool ht = false;
+  if (hub_parse_todo(json, len, &todo, &ht) && ht) {
+    todo.hdr.last_updated = (uint32_t)timekeep_now();
+    ds_set_todo(&todo);
+    return;
+  }
+  /* USER CODE END media_dispatch */
+
   // A "loc" block (issue #54) may ride the (re)connect full frame or arrive alone. Parsed independently
   // of usage/buddy; persist via core/location (hub source wins) + apply tz OUTSIDE any location lock.
   hub_loc_t loc;

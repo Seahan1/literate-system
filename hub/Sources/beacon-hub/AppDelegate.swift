@@ -21,6 +21,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var omp: HookBuddyProvider?                // typed ref for drain + device-connected
     private var poller: UsagePoller!                   // built once providers exist
     private let location = LocationProvider()
+    /* USER CODE BEGIN media_properties */
+    private let nowPlaying = NowPlayingProvider()
+    private var media = MediaState.unavailable
+    private let notesTodo = NotesTodoProvider()
+    private var organizer = OrganizerSnapshot(notes: NotesState(), todo: TodoState())
+    /* USER CODE END media_properties */
     private let tickerStore = TickerConfigStore()   // desired ticker list + monotonic rev (issue #92)
     private var reportAssembler = ReportAssembler()   // reassembles device->hub ticker report chunks (#105)
     private let tickerSearch = TickerSearch()        // Binance(cached) + Yahoo(live) discovery (issue #92 B4)
@@ -81,6 +87,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         startSettings()
         startLoginItem()
         startLocation()
+        /* USER CODE BEGIN media_start */
+        startNowPlaying()
+        startNotesTodo()
+        /* USER CODE END media_start */
         startTickerEditor()
 
         // Heartbeat resends the full frame WITHOUT loc (issue #54): location rides the (re)connect frame
@@ -98,6 +108,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        /* USER CODE BEGIN media_stop */
+        nowPlaying.stop()
+        notesTodo.stop()
+        /* USER CODE END media_stop */
         let drainers = [claude?.drainHeldPrompts, codex?.drainHeldPrompts, omp?.drainHeldPrompts].compactMap { $0 }
         guard !drainers.isEmpty else { return .terminateNow }
         var replied = false
@@ -347,6 +361,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor in
                 self?.reportAssembler.reset()   // discard any partial device report from a prior connection (#105)
                 self?.sendFullFrame(includeLocation: true)
+                /* USER CODE BEGIN media_ready */
+                self?.sendMediaFrame()
+                self?.sendOrganizerFrames()
+                /* USER CODE END media_ready */
                 if let data = try? SessionsFrame(self?.sessions ?? []).encoded() { self?.central.send(data) }
                 self?.pushTickerConfig()
             }
@@ -537,6 +555,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         location.start()
     }
+
+    /* USER CODE BEGIN media_lifecycle */
+    private func startNowPlaying() {
+        nowPlaying.start { [weak self] state in
+            guard let self else { return }
+            self.media = state
+            self.sendMediaFrame()
+        }
+    }
+
+    private func sendMediaFrame() {
+        if let data = try? MediaFrame(media: media).encoded() { central.send(data) }
+    }
+
+    private func startNotesTodo() {
+        notesTodo.start { [weak self] snapshot in
+            guard let self else { return }
+            self.organizer = snapshot
+            self.sendOrganizerFrames()
+        }
+    }
+
+    private func sendOrganizerFrames() {
+        if let notes = try? NotesFrame(notes: organizer.notes).encoded() { central.send(notes) }
+        if let todo = try? TodoFrame(todo: organizer.todo).encoded() { central.send(todo) }
+    }
+    /* USER CODE END media_lifecycle */
 
     // --- frame send ---
 

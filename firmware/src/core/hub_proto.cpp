@@ -152,6 +152,71 @@ bool hub_parse_loc(const char* json, size_t len, hub_loc_t* out) {
   return true;
 }
 
+/* USER CODE BEGIN media_parser */
+bool hub_parse_media(const char* json, size_t len, media_rec_t* out, bool* had_media) {
+  if (!out || !had_media) return false;
+  *had_media = false;
+  JsonDocument doc;
+  if (deserializeJson(doc, json, len)) return false;
+  if ((doc["v"] | 0) != 1) return false;
+  JsonVariantConst m = doc["media"];
+  if (m.isNull()) return true;
+  if (!m.is<JsonObjectConst>()) return false;
+  *had_media = true;
+  copy_trunc(out->title,  MEDIA_TITLE_LEN,  m["title"].as<const char*>());
+  copy_trunc(out->artist, MEDIA_ARTIST_LEN, m["artist"].as<const char*>());
+  copy_trunc(out->album,  MEDIA_ALBUM_LEN,  m["album"].as<const char*>());
+  out->playing = m["playing"] | false;
+  out->position_s = m["positionSeconds"] | (uint32_t)0;
+  out->duration_s = m["durationSeconds"] | (uint32_t)0;
+  copy_trunc(out->lyrics, MEDIA_LYRICS_LEN, m["lyrics"].as<const char*>());
+  return true;
+}
+/* USER CODE END media_parser */
+
+static bool parse_title_array(JsonVariantConst value, char titles[][NOTES_TITLE_LEN], uint8_t* count,
+                              uint8_t capacity, size_t title_capacity) {
+  if (!value.is<JsonArrayConst>()) return false;
+  *count = 0;
+  for (JsonVariantConst item : value.as<JsonArrayConst>()) {
+    if (*count >= capacity) break;
+    const char* title = item.as<const char*>();
+    if (!title) return false;
+    copy_trunc(titles[*count], title_capacity, title);
+    (*count)++;
+  }
+  return true;
+}
+
+bool hub_parse_notes(const char* json, size_t len, notes_rec_t* out, bool* had_notes) {
+  if (!out || !had_notes) return false;
+  *had_notes = false;
+  JsonDocument doc;
+  if (deserializeJson(doc, json, len)) return false;
+  if ((doc["v"] | 0) != 1) return false;
+  JsonVariantConst notes = doc["notes"];
+  if (notes.isNull()) return true;
+  if (!notes.is<JsonObjectConst>()) return false;
+  if (!parse_title_array(notes["titles"], out->titles, &out->count, NOTES_MAX, NOTES_TITLE_LEN)) return false;
+  *had_notes = true;
+  return true;
+}
+
+bool hub_parse_todo(const char* json, size_t len, todo_rec_t* out, bool* had_todo) {
+  if (!out || !had_todo) return false;
+  *had_todo = false;
+  JsonDocument doc;
+  if (deserializeJson(doc, json, len)) return false;
+  if ((doc["v"] | 0) != 1) return false;
+  JsonVariantConst todo = doc["todo"];
+  if (todo.isNull()) return true;
+  if (!todo.is<JsonObjectConst>()) return false;
+  if (!parse_title_array(todo["today"], out->today, &out->today_count, TODO_MAX, TODO_TITLE_LEN)) return false;
+  if (!parse_title_array(todo["overdue"], out->overdue, &out->overdue_count, TODO_MAX, TODO_TITLE_LEN)) return false;
+  *had_todo = true;
+  return true;
+}
+
 // Serialize `doc` into buf as a newline-terminated frame. Returns bytes (incl. '\n', excl. NUL) or 0.
 static size_t finish_frame(JsonDocument& doc, char* buf, size_t cap) {
   size_t need = measureJson(doc);

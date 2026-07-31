@@ -6,6 +6,11 @@
 #define WEATHER_STALE_S    1800u   // 30 min
 #define USAGE_STALE_S       300u   // 5 min / hub-offline
 #define BUDDY_STALE_S       300u
+/* USER CODE BEGIN media_stale */
+#define MEDIA_STALE_S        90u   // refreshed by the hub heartbeat at most every 30 s
+/* USER CODE END media_stale */
+#define NOTES_STALE_S        120u  // refreshed by the Mac organizer poll
+#define TODO_STALE_S         120u  // refreshed by the Mac organizer poll
 
 // Read the per-row stale window from the RUNTIME table (hub-pushed or default), not DEFAULT_TICKERS:
 // a config with rows beyond the default count would otherwise get stale_s=0 and be marked ST_STALE right

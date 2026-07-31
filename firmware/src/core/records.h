@@ -17,6 +17,16 @@
 #define USAGE_PROVIDERS_MAX 4
 #define USAGE_ID_LEN        13   // wire id <=12 ascii chars + NUL
 #define USAGE_LABEL_LEN     11   // display label <=10 chars + NUL
+/* USER CODE BEGIN media_sizes */
+#define MEDIA_TITLE_LEN     65   // 64 UTF-8 code units plus NUL
+#define MEDIA_ARTIST_LEN    49   // 48 UTF-8 code units plus NUL
+#define MEDIA_ALBUM_LEN     49   // 48 UTF-8 code units plus NUL
+#define MEDIA_LYRICS_LEN    513  // 512 UTF-8 bytes plus NUL; bounded to keep one BLE frame
+/* USER CODE END media_sizes */
+#define NOTES_MAX            6
+#define NOTES_TITLE_LEN     49   // 48 UTF-8 code units plus NUL
+#define TODO_MAX             4
+#define TODO_TITLE_LEN      49   // 48 UTF-8 code units plus NUL
 
 enum {                          // wire `state` string => firmware enum
   BST_WORKING = 0,
@@ -80,6 +90,36 @@ typedef struct {
   uint8_t          count;      // active providers in p[] (0..USAGE_PROVIDERS_MAX)
   usage_provider_t p[USAGE_PROVIDERS_MAX];
 } usage_rec_t;
+
+/* USER CODE BEGIN media_record */
+// --- Current media (hub-plane) ---
+typedef struct {
+  record_hdr_t hdr;
+  char title[MEDIA_TITLE_LEN];
+  char artist[MEDIA_ARTIST_LEN];
+  char album[MEDIA_ALBUM_LEN];
+  bool playing;
+  uint32_t position_s;
+  uint32_t duration_s;
+  char lyrics[MEDIA_LYRICS_LEN];
+} media_rec_t;
+/* USER CODE END media_record */
+
+// --- Mac Notes titles (hub-plane) ---
+typedef struct {
+  record_hdr_t hdr;
+  uint8_t count;
+  char titles[NOTES_MAX][NOTES_TITLE_LEN];
+} notes_rec_t;
+
+// --- Mac Reminders titles grouped by due date (hub-plane) ---
+typedef struct {
+  record_hdr_t hdr;
+  uint8_t today_count;
+  uint8_t overdue_count;
+  char today[TODO_MAX][TODO_TITLE_LEN];
+  char overdue[TODO_MAX][TODO_TITLE_LEN];
+} todo_rec_t;
 
 // --- Coding buddy (FR-BUDDY, hub-plane) ---
 // decision_state tracks the local confirm lifecycle of a sent decision so the UI stops lying about

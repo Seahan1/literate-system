@@ -11,17 +11,15 @@
 
 namespace {
 
-struct CodexWindow {
-  lv_obj_t* name = nullptr;
-  lv_obj_t* used = nullptr;
-  lv_obj_t* left = nullptr;
-  lv_obj_t* bar = nullptr;
+struct CodexGauge {
+  lv_obj_t* arc = nullptr;
+  lv_obj_t* pct = nullptr;
+  lv_obj_t* caption = nullptr;
   lv_obj_t* reset = nullptr;
 };
 
 static lv_obj_t* s_status = nullptr;
-static lv_obj_t* s_title = nullptr;
-static CodexWindow s_window[2];
+static CodexGauge s_gauge;
 
 static const usage_provider_t* find_codex(const usage_rec_t& usage)
 {
@@ -33,91 +31,70 @@ static const usage_provider_t* find_codex(const usage_rec_t& usage)
   return nullptr;
 }
 
-static void make_window(lv_obj_t* page, int index, int offset_x, const char* label)
+static void make_gauge(lv_obj_t* page, const beacon_theme_t* theme)
 {
-  const beacon_theme_t* theme = theme_active();
-  lv_obj_t* card = lv_obj_create(page);
-  lv_obj_remove_style_all(card);
-  lv_obj_set_size(card, 174, 238);
-  lv_obj_set_style_border_width(card, theme->stroke_hair, 0);
-  lv_obj_set_style_border_color(card, theme->line, 0);
-  lv_obj_set_style_radius(card, theme->radius, 0);
-  lv_obj_align(card, LV_ALIGN_CENTER, offset_x, 12);
-  lv_obj_clear_flag(card, LV_OBJ_FLAG_SCROLLABLE);
+  constexpr int arc_size = 276;
+  s_gauge.arc = lv_arc_create(page);
+  lv_obj_set_size(s_gauge.arc, arc_size, arc_size);
+  lv_obj_align(s_gauge.arc, LV_ALIGN_CENTER, 0, 16);
+  lv_arc_set_rotation(s_gauge.arc, 135);
+  lv_arc_set_bg_angles(s_gauge.arc, 0, 270);
+  lv_arc_set_range(s_gauge.arc, 0, 100);
+  lv_arc_set_value(s_gauge.arc, 0);
+  lv_obj_remove_style(s_gauge.arc, NULL, LV_PART_KNOB);
+  lv_obj_clear_flag(s_gauge.arc, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_set_style_arc_color(s_gauge.arc, theme->line, LV_PART_MAIN);
+  lv_obj_set_style_arc_color(s_gauge.arc, theme->accent, LV_PART_INDICATOR);
+  lv_obj_set_style_arc_width(s_gauge.arc, 14, LV_PART_MAIN);
+  lv_obj_set_style_arc_width(s_gauge.arc, 14, LV_PART_INDICATOR);
 
-  CodexWindow& window = s_window[index];
-  window.name = lv_label_create(card);
-  lv_obj_add_style(window.name, &S.slot, 0);
-  lv_label_set_text(window.name, label);
-  lv_obj_align(window.name, LV_ALIGN_TOP_LEFT, 16, 16);
+  s_gauge.pct = lv_label_create(page);
+  lv_obj_add_style(s_gauge.pct, &S.hero, 0);
+  lv_obj_set_width(s_gauge.pct, arc_size);
+  lv_obj_set_style_text_align(s_gauge.pct, LV_TEXT_ALIGN_CENTER, 0);
+  lv_label_set_text(s_gauge.pct, "--");
+  lv_obj_align_to(s_gauge.pct, s_gauge.arc, LV_ALIGN_CENTER, 0, -10);
 
-  window.used = lv_label_create(card);
-  lv_obj_add_style(window.used, &S.display, 0);
-  lv_label_set_text(window.used, "--");
-  lv_obj_align(window.used, LV_ALIGN_TOP_LEFT, 16, 54);
+  s_gauge.caption = lv_label_create(page);
+  lv_obj_add_style(s_gauge.caption, &S.display, 0);
+  lv_obj_set_width(s_gauge.caption, arc_size);
+  lv_obj_set_style_text_align(s_gauge.caption, LV_TEXT_ALIGN_CENTER, 0);
+  lv_label_set_text(s_gauge.caption, "7D USAGE");
+  lv_obj_align_to(s_gauge.caption, s_gauge.arc, LV_ALIGN_CENTER, 0, 48);
 
-  window.bar = lv_bar_create(card);
-  lv_obj_set_size(window.bar, 142, 8);
-  lv_obj_align(window.bar, LV_ALIGN_TOP_LEFT, 16, 118);
-  lv_bar_set_range(window.bar, 0, 100);
-  lv_bar_set_value(window.bar, 0, LV_ANIM_OFF);
-  bg_opa_if(window.bar, LV_OPA_COVER, LV_PART_MAIN);
-  bg_opa_if(window.bar, LV_OPA_COVER, LV_PART_INDICATOR);
-  bg_color_if(window.bar, theme->line, LV_PART_MAIN);
-  bg_color_if(window.bar, theme->accent, LV_PART_INDICATOR);
-
-  window.left = lv_label_create(card);
-  lv_obj_add_style(window.left, &S.slot, 0);
-  lv_label_set_text(window.left, "-- left");
-  lv_obj_align(window.left, LV_ALIGN_TOP_LEFT, 16, 148);
-
-  window.reset = lv_label_create(card);
-  lv_obj_add_style(window.reset, &S.slot, 0);
-  lv_label_set_text(window.reset, "reset --");
-  lv_obj_align(window.reset, LV_ALIGN_TOP_LEFT, 16, 182);
+  s_gauge.reset = lv_label_create(page);
+  lv_obj_add_style(s_gauge.reset, &S.slot, 0);
+  lv_label_set_text(s_gauge.reset, "RESET --");
+  lv_obj_align_to(s_gauge.reset, s_gauge.arc, LV_ALIGN_OUT_BOTTOM_MID, 0, 4);
 }
 
 static void build(lv_obj_t* page)
 {
   const beacon_theme_t* theme = theme_active();
   s_status = build_header(page, "CODEX");
-
-  s_title = lv_label_create(page);
-  lv_obj_add_style(s_title, &S.display, 0);
-  lv_label_set_text(s_title, "CODEX QUOTA");
-  lv_obj_align(s_title, LV_ALIGN_TOP_LEFT, SAFE_INSET, SAFE_INSET + 34);
-  txt_color(s_title, theme->accent);
-
-  make_window(page, 0, -96, "5H WINDOW");
-  make_window(page, 1, 96, "7D WINDOW");
+  make_gauge(page, theme);
 }
 
-static void set_window(CodexWindow& window, const usage_window_t& value, bool placeholder,
-                       bool dim, const beacon_theme_t* theme, uint32_t now)
+static void set_gauge(const usage_window_t& value, bool placeholder, bool dim,
+                      const beacon_theme_t* theme, uint32_t now)
 {
+  char reset[12];
+  reset_str(reset, sizeof(reset), placeholder ? 0 : value.reset, now);
+  txt_fmt(s_gauge.reset, "RESET %s", reset);
+
   if (placeholder || value.pct < 0) {
-    txt_set(window.used, "--");
-    txt_set(window.left, "-- left");
-    txt_set(window.reset, "reset --");
-    hidden_set(window.bar, true);
-    txt_color(window.used, theme->ink_dim);
-    txt_color(window.left, theme->ink_dim);
+    txt_set(s_gauge.pct, "--");
+    if (lv_arc_get_value(s_gauge.arc) != 0) lv_arc_set_value(s_gauge.arc, 0);
+    txt_color(s_gauge.pct, theme->ink_dim);
+    lv_obj_set_style_arc_color(s_gauge.arc, theme->line, LV_PART_INDICATOR);
     return;
   }
 
   int used = value.pct > 100 ? 100 : value.pct;
-  int left = 100 - used;
-  txt_fmt(window.used, "%d%% USED", used);
-  txt_fmt(window.left, "%d%% LEFT", left);
-  char reset[12];
-  reset_str(reset, sizeof(reset), value.reset, now);
-  txt_fmt(window.reset, "reset %s", reset);
-  hidden_set(window.bar, false);
-  bar_set_if(window.bar, used);
-  bg_color_if(window.bar, dim ? theme->line : theme->accent, LV_PART_INDICATOR);
-  txt_color(window.used, dim ? theme->ink_dim : theme->ink);
-  txt_color(window.left, dim ? theme->ink_dim : theme->ink);
-  txt_color(window.reset, theme->ink_dim);
+  txt_fmt(s_gauge.pct, "%d%%", used);
+  if (lv_arc_get_value(s_gauge.arc) != used) lv_arc_set_value(s_gauge.arc, used);
+  txt_color(s_gauge.pct, dim ? theme->ink_dim : theme->ink);
+  lv_obj_set_style_arc_color(s_gauge.arc, dim ? theme->line : theme->accent, LV_PART_INDICATOR);
 }
 
 static void update(void)
@@ -131,8 +108,7 @@ static void update(void)
   usage_window_t none = usage_none();
 
   slot_set(s_status, "HUB 30S", &usage.hdr, now);
-  set_window(s_window[0], codex ? codex->h5 : none, placeholder, dim, theme, now);
-  set_window(s_window[1], codex ? codex->d7 : none, placeholder, dim, theme, now);
+  set_gauge(codex ? codex->d7 : none, placeholder, dim, theme, now);
 }
 
 }

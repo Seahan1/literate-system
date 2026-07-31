@@ -53,6 +53,14 @@ typedef struct { float lat, lon; char tz[40]; char name[48]; } hub_loc_t;
 // to their capacities. Kept separate from hub_parse_status so existing callers/tests stay unchanged.
 bool hub_parse_loc(const char* json, size_t len, hub_loc_t* out);
 
+/* USER CODE BEGIN media_parser_api */
+// Parse an independent {"v":1,"media":{...}} frame. A valid frame without media returns true with
+// *had_media false so callers can continue dispatching other independent frame types.
+bool hub_parse_media(const char* json, size_t len, media_rec_t* out, bool* had_media);
+/* USER CODE END media_parser_api */
+bool hub_parse_notes(const char* json, size_t len, notes_rec_t* out, bool* had_notes);
+bool hub_parse_todo(const char* json, size_t len, todo_rec_t* out, bool* had_todo);
+
 // --- Inbound: hub -> device sessions frame ---
 // Parse {"v":1,"sessions":[...]} into buddy->sessions[] (capped at BUDDY_SESSIONS_MAX, labels
 // truncated, unknown state strings => BST_WORKING). Sets *had_sessions true when a "sessions"

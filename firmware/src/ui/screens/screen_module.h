@@ -9,9 +9,7 @@
 // Usage (in a .cpp that includes the theme view externs):
 //   SCREEN_MODULE_SIMPLE(home, "HOME", home_module)
 //
-// Expands to:
-//   extern const screen_view_t home_editorial_view, ...;
-//   static const screen_view_t* V[] = { &home_editorial_view, ... };
+// Expands to the seven resident screen views plus the Pac-Man theme's shared composition.
 //   static lv_obj_t* build(lv_obj_t* page) { V[theme_index()]->build(page); return page; }
 //   static void update(void) { V[theme_index()]->update(); }
 //   const screen_module_t home_module = { "HOME", build, update };
@@ -23,7 +21,7 @@
   static const screen_view_t* V[] = {                                               \
     &PREFIX##_editorial_view, &PREFIX##_hud_view, &PREFIX##_calm_view,              \
     &PREFIX##_blueprint_view, &PREFIX##_led_view, &PREFIX##_oscilloscope_view,       \
-    &PREFIX##_analog_view,                                                           \
+    &PREFIX##_analog_view, &PREFIX##_calm_view,                                      \
   };                                                                                 \
   static lv_obj_t* build(lv_obj_t* page) { V[theme_index()]->build(page); return page; } \
   static void update(void) { V[theme_index()]->update(); }                          \

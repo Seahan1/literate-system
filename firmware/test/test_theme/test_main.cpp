@@ -6,13 +6,13 @@ void setUp(void) {}
 void tearDown(void) {}
 
 static void test_catalog_count(void) {
-  TEST_ASSERT_EQUAL_INT(7, THEME_COUNT);
+  TEST_ASSERT_EQUAL_INT(8, THEME_COUNT);
 }
 
 // ids match the DESIGN.md canonical set, in order, unique.
 static void test_catalog_ids(void) {
   const char* expect[THEME_COUNT] = {
-    "editorial", "hud", "dotmatrix", "blueprint", "led", "oscilloscope", "analog"
+    "editorial", "hud", "dotmatrix", "blueprint", "led", "oscilloscope", "analog", "pacman"
   };
   for (int i = 0; i < THEME_COUNT; i++) {
     TEST_ASSERT_NOT_NULL(THEME_CATALOG[i].id);
@@ -36,7 +36,7 @@ static void test_catalog_invariants(void) {
 // gauge style per DESIGN.md catalog (the frozen mapping).
 static void test_catalog_gauge_mapping(void) {
   gauge_style_t expect[THEME_COUNT] = {
-    GAUGE_BAR, GAUGE_RING, GAUGE_BIGFIG, GAUGE_MEASURE, GAUGE_CELL, GAUGE_WAVEFORM, GAUGE_SUBDIAL
+    GAUGE_BAR, GAUGE_RING, GAUGE_BIGFIG, GAUGE_MEASURE, GAUGE_CELL, GAUGE_WAVEFORM, GAUGE_SUBDIAL, GAUGE_CELL
   };
   for (int i = 0; i < THEME_COUNT; i++)
     TEST_ASSERT_EQUAL_INT(expect[i], THEME_CATALOG[i].gauge);

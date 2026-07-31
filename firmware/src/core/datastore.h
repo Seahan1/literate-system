@@ -18,6 +18,11 @@ void ds_set_finance(uint8_t idx, const finance_rec_t* r);  // preserves the slot
 void ds_set_finance_if(uint8_t idx, const char* expect_id, const finance_rec_t* r);
 void ds_set_usage(const usage_rec_t* r);
 void ds_set_buddy(const buddy_rec_t* r);
+/* USER CODE BEGIN media_datastore_api */
+void ds_set_media(const media_rec_t* r);
+/* USER CODE END media_datastore_api */
+void ds_set_notes(const notes_rec_t* r);
+void ds_set_todo(const todo_rec_t* r);
 
 // Reseed the finance slots from a new ticker set (A5 live re-apply): set the new count and, per slot,
 // the new id + ST_LOADING with value/change zeroed. Called after a validated hub config swap.
@@ -40,6 +45,11 @@ finance_rec_t    ds_get_finance(uint8_t idx);
 uint8_t          ds_get_finance_count(void);
 usage_rec_t      ds_get_usage(void);
 buddy_rec_t      ds_get_buddy(void);
+/* USER CODE BEGIN media_datastore_get */
+media_rec_t      ds_get_media(void);
+/* USER CODE END media_datastore_get */
+notes_rec_t       ds_get_notes(void);
+todo_rec_t        ds_get_todo(void);
 
 // Staleness sweep (~1/s from a Core-0 timer). For each record: if state==ST_LIVE and
 // record_age_s(hdr, now) >= stale_s(source), promote to ST_STALE. Inclusive boundary.
