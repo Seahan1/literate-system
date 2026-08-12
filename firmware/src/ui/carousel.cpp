@@ -17,6 +17,7 @@
 #include "ui/screens/screen_media.h"
 #include "ui/screens/screen_notes.h"
 #include "ui/screens/screen_todo.h"
+#include "ui/screens/screen_status.h"
 /* USER CODE END codex_screen */
 
 static const screen_module_t* MODULES[] = {
@@ -26,13 +27,14 @@ static const screen_module_t* MODULES[] = {
   &media_module,
   &notes_module,
   &todo_module,
+  &status_module,
   /* USER CODE END codex_module */
 };
 static const int COUNT = (int)(sizeof(MODULES) / sizeof(MODULES[0]));
 
 static lv_obj_t* s_pager = nullptr;
-static lv_obj_t* s_pages[10];
-static lv_obj_t* s_dots[10];
+static lv_obj_t* s_pages[11];
+static lv_obj_t* s_dots[11];
 static int s_current = 0;
 static bool s_settling = false;   // guards reentrant SCROLL_END from our own recenter()
 static lv_timer_t* s_tick = nullptr;   // the 500ms visible-screen update timer; paused while idle (#60)
