@@ -19,8 +19,8 @@
 #define USAGE_LABEL_LEN     11   // display label <=10 chars + NUL
 /* USER CODE BEGIN media_sizes */
 #define MEDIA_TITLE_LEN     65   // 64 UTF-8 bytes plus NUL
-#define MEDIA_ARTIST_LEN    49   // 48 UTF-8 code units plus NUL
-#define MEDIA_ALBUM_LEN     49   // 48 UTF-8 code units plus NUL
+#define MEDIA_ARTIST_LEN    49   // 48 UTF-8 bytes plus NUL
+#define MEDIA_ALBUM_LEN     49   // 48 UTF-8 bytes plus NUL
 #define MEDIA_LYRICS_LEN    513  // 512 UTF-8 bytes plus NUL; bounded to keep one BLE frame
 /* USER CODE END media_sizes */
 #define NOTES_MAX            6
